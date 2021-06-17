@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Rent everything</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.2.0/mapbox-gl.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="/Searching/css/account.css" />
+  <link rel="stylesheet" href="/Searching/css/activities.css" />
+  <link rel="stylesheet" href="/Searching/css/markerStyle.css" />
+  <link rel="stylesheet" href="/Searching/css/loadingStyle.css" />
+  <link rel="stylesheet" href="/Searching/css/mainStyle.css" />
+  <link rel="stylesheet" href="/Searching/css/toggleStyle.css" />
+  <link rel="stylesheet" href="/Searching/css/result.css" />
+  <link rel="stylesheet" href="/Searching/css/tabs.css" />
+
+  <script defer src="https://cdn.socket.io/socket.io-3.0.0.js"></script>
+  <script defer src="https://api.mapbox.com/mapbox-gl-js/v2.2.0/mapbox-gl.js"></script>
+  <script defer src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+  <script defer src="/Searching/js/activities.js"></script>
+  <script defer src="/Searching/js/template.js"></script>
+  <script defer src="/Searching/js/loadMap.js"></script>
+  <script defer src="/Searching/js/result.js"></script>
+  <script defer src="/Searching/js/search.js"></script>
+  <script defer src="/Searching/js/tabNavigation.js"></script>
+  <script defer src="/Searching/js/notifications.js"></script>
+  <script defer src="/Searching/js/mainSocket.js"></script>
+
+</head>
+
+<body>
+
+
+  <div style='display:flex;
+    position: relative;
+    justify-content: center;
+    width: 100vw; 
+    height: 90vh;'>
+
+    <div class='tabContainer'>
+
+      <!-- Logo HERE -->
+
+      <h1 style="
+      color: #7a9e9f;
+      font-weight: 900;
+      position: relative;
+      font-size: 50px;
+      margin:0;
+      margin-left: 13px;
+      ">
+        Ree
+      </h1>
+
+      <div class="tab">
+        <button class="tablinks" onclick="openCity(event, 'notifications')">Notifications
+          <hr class='underlineTab'>
+        </button>
+        <button class="tablinks" onclick="openCity(event, 'activities')">Activities
+          <hr class='underlineTab'>
+        </button>
+        <button class="tablinks" onclick="openCity(event, 'account')">Account
+          <hr class='underlineTab'>
+        </button>
+      </div>
+
+      <div id="notifications" class="tabcontent" name="notifications">
+        <!-- FILTERS -->
+
+        <div>
+          <button style='border: 2px solid rgba(0,0,0,0.1);
+            background-color:white;
+            border-radius:5px;
+            display: flex;
+            padding: 5px;
+            justify-content:center;
+            align-items: center;'>
+
+            <img src="/Searching/images/filter.png" style='width:15px' alt="">
+            <p style='margin:2px'>Filters</p>
+          </button>
+        </div>
+
+        <h3>Sort by</h3>
+
+        <div id="notiCard_container">
+
+          <!-- CARDS -->
+
+        </div>
+
+      </div>
+
+
+      <div id="activities" class="tabcontent" name="activities">
+        <h3>Activities</h3>
+        <div style="display: flex;flex-direction: column; width: 100%;height: 100%;">
+          <p style="color:rgba(0, 0, 0, 0.5)">Recent</p>
+
+
+          <div id='activities-recent-container'>
+            <!-- CARDS -->
+
+          </div>
+
+          <p style="color:rgba(0, 0, 0, 0.5)"">History</p>
+            
+
+        <div id='activities-history-container'>
+          
+        </div>
+      </div>
+
+    </div>
+
+    <div id="account" class="tabcontent" name="account">
+          <h3>Account</h3>
+          <div class="account-container">
+            <div class="account-button-container">
+              <button class="account-button">Settings</button>
+            </div>
+            <div class="account-button-container">
+              <button class="account-button">Inventory</button>
+            </div>
+            <div class="account-button-container">
+              <button class="account-button">Privacy</button>
+            </div>
+            <div class="account-button-logout-container">
+              <button class="account-button-logout">Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Frame -->
+      <div class="searchFrame">
+        <!-- SEARCH FIELD + MODE + SUGGESTION -->
+
+        <!-- SEARCH + EMERGENCY MODE HERE -->
+        <div style="display: flex; position: relative ; flex-wrap: wrap;">
+          <!-- SEARCH FIELD -->
+
+          <div style="width: 70%; height: 40px;">
+            <div class="searchBox">
+              <input id='search-box' oninput="expandSuggestions(event)" type="text" name="searchBox"
+                placeholder="Item" />
+              <div id='suggestions-container'></div>
+            </div>
+          </div>
+          <!-- EMERGENCY MODE -->
+          <div style="display: flex; flex-direction: column; margin-left: 10px">
+            <label class="form-switch">
+              <input type="checkbox" onclick="isEnmergency_click(event)" />
+              <i></i>
+            </label>
+            <div style="
+                display: flex;
+                justify-content: center;
+                align-items: center;
+              ">
+              <p style="font-size: 10px; color: rgba(0, 0, 0, 0.5)">
+                Enmergency Mode
+              </p>
+              <img src="/Searching/images/question.png" alt="" style="width: 10px; height: 10px; margin-left: 5px" />
+            </div>
+          </div>
+        </div>
+
+        <div id="itemError" style="display: none; align-items: center; ">
+          <div class="errorCircle" style='background-color: lightcoral; margin:5px'></div>
+          <p style='color:lightcoral ;font-size:13px'>Please enter your item name</p>
+        </div>
+
+        <!-- RESULT HERE -->
+        <div id='resultFrame'></div>
+        <!-- SEARCH BUTTON HERE -->
+        <div class='searchButtonFrame'>
+          <button id="searchButton">SEARCH</button>
+          <p style="font-weight:300;font-size: 13px; color: rgba(0, 0, 0, 0.5);margin-top: 20px ; margin-left:20px;">
+            Let's
+            go here</p>
+        </div>
+      </div>
+
+      <!-- MAP HERE -->
+      <div class='mapContainer'>
+        <div class="lds-ellipsis">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+        <div id="map"></div>
+      </div>
+
+
+    </div>
+</body>
+
+</html>
